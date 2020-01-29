@@ -1,16 +1,14 @@
-
-const MongoClient = require('mongodb').MongoClient;
-
-try {
-    const uri = "mongodb://root:root@mycluster0-shard-00-00.mongodb.net:27017,mycluster0-shard-00-01.mongodb.net:27017,mycluster0-shard-00-02.mongodb.net:27017/admin?ssl=true&replicaSet=Mycluster0-shard-0&w=majority";
-    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    client.connect(err => {
-        console.log('connected')
-    const collection = client.db("test").collection("devices");
-    // perform actions on the collection object
-    client.close();
-    });
-    
-} catch (error) {
-    console.log('ERROR: ', error)
-}
+const mongoose = require("mongoose");
+const dbPath = "mongodb://root:root@cluster0-shard-00-00-pbpji.mongodb.net:27017,cluster0-shard-00-01-pbpji.mongodb.net:27017,cluster0-shard-00-02-pbpji.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
+mongoose.connect(dbPath, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+const db = mongoose.connection;
+db.on("error", () => {
+    console.log("> error occurred from the database");
+});
+db.once("open", () => {
+    console.log("> successfully opened the database");
+});
+module.exports = mongoose;
