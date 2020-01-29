@@ -1,1 +1,1 @@
-worker: node db
+worker: node app
