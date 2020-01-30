@@ -286,3 +286,14 @@ app.get('/api/user/:name', async(req, res) => {
         res.send({status: 'NOT_FOUND'})
     }
 })
+
+
+app.post('/getRoleUUAAS', async(req, res) => {
+    try {
+        const roleUUAAS = await Roles.find({name: req.body.data.rolename}, {uuaas: 1, _id: 0});
+        res.send(...roleUUAAS);
+    } catch (error) {
+        console.log(error)
+        res.send({status: 'NOT_FOUND'})
+    }
+})
