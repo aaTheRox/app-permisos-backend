@@ -40,6 +40,21 @@ app.get('/', async(req, res) => {
     await user.save()
 })
 
+
+app.post('/register', async(req, res) => {
+    console.log(req.body);
+    const findUser = await Users.find({user: req.body.user});
+    console.log(findUser);
+    
+    if(findUser.length==0) {
+        const user = await Users({user: req.body.user, password: req.body.password});
+        user.save();
+        res.send({status: 'USER_ADDED'})
+    } else {
+        res.send({status: 'USER_EXISTS'})
+    }
+});
+
 app.post('/login', async(req, res) => {
     let user;
     try {
