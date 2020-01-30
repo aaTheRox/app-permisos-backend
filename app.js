@@ -7,12 +7,8 @@ methodOverride = require("method-override"),
 dotenv = require('dotenv');
 dotenv.config()
 
-// MONGOOSE CONNECTION
 const mongoose = require('./db') 
-/*const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(db => console.log('---------------- Conectado a MongoDB con éxito ----------------'))
-    .catch(error => console.log(error))*/
+
 
 // Mongoose Models
 const Users = require('./models/users');
@@ -35,10 +31,30 @@ app.use(function(req, res, next) {
 app.listen(PORT, () => {
     console.log(`Node server running on http://localhost:${PORT}`);
 });
-app.get('/', async(req, res) => {
+app.get('/secret', async(req, res) => {
     const user = new Users({ user: 'admin', password: 'admin' });
     await user.save()
 })
+
+
+app.get('/u/delete/:user', async(req, res) => {
+    console.log(req.body);
+
+    try {
+        const findUser = await Users.find({user: req.params.user});
+        console.log(findUser);
+
+        if(findUser.length>0) {
+            const user = await Users.deleteOne({user: req.params.user});
+            res.send({status: 'USER_DELETED'})
+        } else {
+            res.send({status: 'USER_NOT_FOUND'})
+        }
+        
+    } catch (error) {
+        console.log('ESTO HA PETADO ', error)
+    }
+});
 
 
 app.post('/register', async(req, res) => {
