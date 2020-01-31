@@ -1,6 +1,6 @@
 const PORT = process.env.PORT || 8888,
-
-express = require("express")
+cors = require('cors'),
+express = require("express"),
 app = express(),
 bodyParser = require("body-parser"),
 methodOverride = require("method-override"),
@@ -14,6 +14,7 @@ const mongoose = require('./db')
 const Users = require('./models/users');
 const UUAA = require('./models/uuaas');
 const Roles = require('./models/roles');
+const Permissions = require('./models/permissions');
 
 
 // CONFIG
@@ -21,11 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+app.use(cors());
 
 
 app.listen(PORT, () => {
@@ -179,7 +176,7 @@ app.post('/addRole', async(req, res) => {
             await Roles.updateOne({_id: filter._id}, {
                 $set: {
                     name: filter.roleName,
-                    uuaas: filter.uuaas
+                    permissions: filter.permissions
                 }
             });
 
@@ -187,7 +184,7 @@ app.post('/addRole', async(req, res) => {
 
         } else { // ADD A ROLE
             if(role.length==0) {
-                const newRole = await Roles({name: filter.roleName, uuaas: filter.uuaas});
+                const newRole = await Roles({name: filter.roleName, permissions: filter.permissions});
                 newRole.save();
                 res.send({status: 'ROLE_ADDED'})
             } else {
@@ -295,5 +292,67 @@ app.post('/getRoleUUAAS', async(req, res) => {
     } catch (error) {
         console.log(error)
         res.send({status: 'NOT_FOUND'})
+    }
+})
+
+app.post('/getPermissions', async(req, res) => {
+    try {
+    const permissions = await Permissions.find();
+    res.send(permissions);
+
+    } catch (error) {
+        console.log(error)
+        res.send({status: 'NOT_FOUND'})
+    }
+})
+
+app.post('/addPermission', async(req, res) => {
+    const filter = req.body.data;
+    console.log(filter)
+    try {
+        const permission = await Permissions.find({name: filter.name});
+        if(filter.editMode) { // EDIT A ROLE
+            console.log('fff', filter)
+
+            await Permissions.updateOne({_id: filter._id}, {
+                $set: {
+                    name: filter.name
+                }
+            });
+
+            res.send({status: 'PERMISSION_EDITED'})
+
+        } else { // ADD A PERMISSION
+            if(permission.length==0) {
+                const newPermission = await Permissions({name: filter.name});
+                newPermission.save();
+                res.send({status: 'PERMISSION_ADDED'})
+            } else {
+                res.send({status: 'PERMISSION_EXISTS'})
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        res.send({status: 'NOT_FOUND'})
+    }
+})
+
+
+app.post('/deletePermission', async(req, res) => {
+    const filter = req.body.data;
+    try {
+        const permission = await Permissions.findById({_id: filter._id});
+        console.log(permission)
+
+        if(permission) {
+            const newRole = await Permissions.deleteOne({_id: filter._id});
+           res.send({status: 'PERMISSION_DELETED'})
+        } else{
+           res.send({status: 'PERMISSION_NOT_FOUND'})
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.send({status: 'ERROR'})
     }
 })
