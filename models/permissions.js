@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const RoleSchema = new Schema({
+const PermissionsSchema = new Schema({
     name: {
         type: String,
     },
 })
 
-module.exports = mongoose.model('permissions', RoleSchema);
+module.exports = mongoose.model('permissions', PermissionsSchema);
